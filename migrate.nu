@@ -65,26 +65,6 @@ def main [old_site: path] {
     print $"  added ($w.name)  \(($w.id) → ($new_id)\)"
   }
 
-  # ── Posts ─────────────────────────────────────────────────
-  print "\nMigrating posts..."
-  let posts = (open $old_db
-    | query db "SELECT id, walker_id, text_content, image_filename, created_at FROM post")
-
-  for p in $posts {
-    let walker_key = ($p.walker_id | into string)
-    if not ($walker_key in $walker_map) {
-      print $"  skip  post ($p.id) \(walker ($p.walker_id) not found\)"
-      continue
-    }
-    let new_walker_id = ($walker_map | get $walker_key)
-    let text  = (do $esc $p.text_content)
-    let image = (do $esc ($p.image_filename | default "" | into string))
-    let ts    = (do $esc ($p.created_at | into string))
-
-    sqlite3 $new_db $"INSERT INTO post \(walker_id, text_content, image_filename, created_at\) VALUES \(($new_walker_id), '($text)', '($image)', '($ts)'\)"
-    print $"  added post ($p.id)"
-  }
-
   # ── Avatar files ──────────────────────────────────────────
   let old_avatars = ($old_site | path join "avatars")
   if ($old_avatars | path exists) {
@@ -99,23 +79,9 @@ def main [old_site: path] {
     print $"  ($files | length) avatar\(s\) copied"
   }
 
-  # ── Post picture files ───────────────────────────────────
-  let old_pictures = ($old_site | path join "pictures")
-  if ($old_pictures | path exists) {
-    print "\nCopying pictures..."
-    mkdir pictures
-    let files = (ls $old_pictures | where type == file)
-    for f in $files {
-      let dest = ("pictures" | path join ($f.name | path basename))
-      cp $f.name $dest
-      print $"  ($f.name | path basename)"
-    }
-    print $"  ($files | length) picture\(s\) copied"
-  }
-
   print "\nMigration complete!"
   print $"  Families: ($families | length)"
   print $"  Walkers:  ($walkers | length)"
-  print $"  Posts:    ($posts | length)"
+  print "  Posts:    skipped \(fresh start\)"
   print "  Miles:    skipped \(fresh start\)"
 }

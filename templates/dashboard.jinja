@@ -128,7 +128,7 @@ const milesChart = new Chart(ctx, {
 		datasets: [{
 			label: 'Daily Miles',
 			data: [], // Will be populated with miles data
-			borderColor: 'rgb(59, 130, 246)',
+			borderColor: '#F8F59B',
 			backgroundColor: 'rgba(59, 130, 246, 0.1)',
 			tension: 0.1,
 			fill: true
@@ -194,7 +194,7 @@ function loadDashboardData() {
 						<td>${entry.date}</td>
 						<td class="miles-display-${entry.id}">${entry.miles}</td>
 						<td style="text-align: right;">
-							<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="editMiles(${entry.id}, ${entry.miles})">Edit</button>
+							<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--neutral-oklch-50);" onclick="editMiles(${entry.id}, ${entry.miles})">Edit</button>
 						</td>
 					</tr>`;
 				});
@@ -216,9 +216,9 @@ function editMiles(entryId, currentMiles) {
 	cells[1].innerHTML = `<input type="number" id="edit-miles-${entryId}" value="${currentMiles}" step="0.1" min="0.1" max="50" style="width: 80px; margin: 0; padding: 0.25rem;" class="numbers">`;
 	cells[2].innerHTML = `
 		<div style="display: flex; gap: 0.25rem; justify-content: flex-end;">
-			<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="submitEditMiles(${entryId})">Save</button>
-			<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--error-oklch-500);" onclick="deleteMiles(${entryId})">Delete</button>
-			<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="loadDashboardData()">Cancel</button>
+			<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background-color: var(--success-oklch-500); color: var(--neutral-oklch-50);" onclick="submitEditMiles(${entryId})">Save</button>
+			<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background-color: var(--error-oklch-500); color: var(--neutral-oklch-50);" onclick="deleteMiles(${entryId})">Delete</button>
+			<button class="secondary outline" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; color: var(--neutral-oklch-50);" onclick="loadDashboardData()">Cancel</button>
 		</div>`;
 }
 

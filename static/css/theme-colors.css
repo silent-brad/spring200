@@ -1,43 +1,16 @@
 :root {
   /* Pastel Spring Dreams */
-  /* Blue, Blue-green, Green-blue, Green, Red, Red
-  /* Yellow, Yellow-orange, Orange-yellow, Orange, Blue-green, Blue-green, Violet-blue? */
-  /* Yellow, Pink, Violet, Blue, Green, Orange */
-
-  /*Pastel Dreams*/
-  /*~Wisteria Blue
-#809bce
-Gentle blue-violet with wisteria tinge glows with creativity and calming poise, ideal for inspiring ideas.
-~Powder Blue
-#95b8d1
-Soft, comforting blue gently wraps settings in subtle sophistication, perfectly blending nostalgia with modern minimalism.
-~Frozen Water
-#b8e0d2
-Barely-there turquoise shimmer conjures icy dawns, frosted lakes, and delicate snow-crystal magic.
-~Honeydew
-#d6eadf
-Delicate as morning mist on fresh grass, this pale green whispers of renewal, peace, and gentle optimism.
-~Pastel Petal
-#eac4d5
-Feather-light blend of blush and gentle lilac, sparkling with cheerful sweetness and inviting innocence for all.
-#D19494
-   #EBD5D5*/
-  /*--primary-color: #CFCC80;
-  --secondary-color: #D1C394;
-  --accent-color: #E0CCB8;
-  --success-color: #EBDAD5;
-  --error-color: #94BFD1;
-  --warning-color: #D5E4EB;
-  --neutral-color: #D5E4EB;
-  */
-
-  --primary-color: #F8F59B;
-  --secondary-color: #F3E3AC;
-  --accent-color: #F0DBC5;
-  --success-color: #F7E6E0;
-  --error-color: #94BFD1;
-  --neutral-color: #D5E4EB;
-  --warning-color: #D5E4EB;
+  /* Blue, Green, Red ==> Yellow, Blue-Green, Orange */
+  /* Yellows */
+  --primary-color: #FFF3A5;
+  --secondary-color: #E6DDA2;
+  /* Blue-greens */
+  --accent-color: #B8E0CB;
+  --success-color: #D5EBE8;
+  /* Oranges */
+  --error-color: #E7C4A5;
+  --neutral-color: #EBE0D5;
+  --warning-color: #EBE0D5;
 
 
   /* Base colors for the application */
@@ -138,8 +111,8 @@ Feather-light blend of blush and gentle lilac, sparkling with cheerful sweetness
   --color-background: var(--neutral-oklch-50);
   --color-surface: var(--neutral-oklch-100);
   --color-surface-variant: var(--neutral-oklch-200);
-  --color-text: var(--neutral-oklch-900);
-  --color-text-secondary: var(--neutral-oklch-700);
+  --color-text: var(--primary-oklch-700);
+  --color-text-secondary: var(--neutral-oklch-600);
   --color-text-muted: var(--neutral-oklch-500);
   --color-border: var(--neutral-oklch-300);
   --color-border-light: var(--neutral-oklch-200);
