@@ -54,7 +54,7 @@ proc main() {.async.} =
   init_lock(sessions_lock)
   
   var server = new_async_http_server()
-  echo "Starting Spring200 server on port ", port
+  echo "Starting Spring92 server on port ", port
   await server.serve(Port(port), handle_request)
 
 when is_main_module:

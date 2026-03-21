@@ -1,0 +1,31 @@
+#+TITLE: TODO list for fork
+
+* DONE Switch name
+  Spring200?
+  Spring Walking Challenge
+* DONE Design/switch color scheme
+  - Yellow primary color
+
+* DONE Design logo
+  - Perfect color scheme.
+  - Convert to PNG
+
+* TODO Design hero image
+  Walking path with field of daffodil
+* DONE Fix time
+* DONE Add edit button to mile tracker
+  - Fix styling
+* DONE In WYSIWYG editor, add better quoting
+  CLOSED: [2026-03-20 Fri 15:20]
+  So that the attribution is added to quote.
+
+* DONE Migrate accounts from Winter91 site without miles?
+  CLOSED: [2026-03-20 Fri 15:22]
+  Also, don't forget avatars
+
+* DONE In dashboard, make number display without more than two decimals
+  CLOSED: [2026-03-20 Fri 15:12]
+* DONE Update start/stop date
+  CLOSED: [2026-03-20 Fri 15:11]
+
+* TODO Deploy to Homelab (also migrate)

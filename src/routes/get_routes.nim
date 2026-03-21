@@ -27,9 +27,9 @@ proc handle_get_routes*(req: Request, session: Option[Session], db_conn: DbConn)
       var success_msg: Option[string] = none(string)
       if req.url.query.len > 0:
         if "success=signup" in req.url.query:
-          success_msg = some("Welcome to Spring200!")
+          success_msg = some("Welcome to Spring92!")
         elif "success=login" in req.url.query:
-          success_msg = some("Welcome back to Spring200!")
+          success_msg = some("Welcome back to Spring92!")
       response_body = render_leaderboard(session, success_msg)
 
   of "/dashboard":
@@ -43,9 +43,9 @@ proc handle_get_routes*(req: Request, session: Option[Session], db_conn: DbConn)
       var success_msg: Option[string] = none(string)
       if req.url.query.len > 0:
         if "success=signup" in req.url.query:
-          success_msg = some("Account created successfully! Welcome to Spring200!")
+          success_msg = some("Account created successfully! Welcome to Spring92!")
         elif "success=login" in req.url.query:
-          success_msg = some("Login successful! Welcome back to Spring200!")
+          success_msg = some("Login successful! Welcome back to Spring92!")
       response_body = render_template("dashboard.jinja", session, success_message = success_msg, current_total = some(current_total), progress_percent = some(progress_pct))
 
   of "/log":

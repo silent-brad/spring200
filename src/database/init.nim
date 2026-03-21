@@ -1,7 +1,7 @@
 import db_connector/db_sqlite
 
 proc init_database*(): DbConn =
-  let db = open("spring200.db", "", "", "")
+  let db = open("spring92.db", "", "", "")
   
   db.exec(sql"""
     CREATE TABLE IF NOT EXISTS family (

@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-# Migrate user data from an old Spring200 site to the current one.
+# Migrate user data from an old Spring92 site to the current one.
 # Copies families, walkers, posts, avatars, and post pictures.
 # Skips mile_entry so users get a fresh start.
 #
@@ -8,7 +8,7 @@
 
 def main [old_site: path] {
   let old_db = ($old_site | path join "winter91.db")
-  let new_db = "spring200.db"
+  let new_db = "spring92.db"
 
   if not ($old_db | path exists) {
     error make { msg: $"Old database not found at ($old_db)" }

@@ -1,5 +1,5 @@
 {
-  description = "Spring200 Challenge";
+  description = "Spring92 Challenge";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -21,7 +21,7 @@
       in
       {
         packages.default = pkgs.stdenv.mkDerivation {
-          pname = "spring200";
+          pname = "spring92";
           version = "0.0.1";
           src = ./.;
 
@@ -88,7 +88,7 @@
               dev-build && ./app
             }
 
-            echo "Spring200 dev shell"
+            echo "Spring92 dev shell"
             echo "  dev-build  — compile the app"
             echo "  dev-run    — compile and run (static files served live from ./static/)"
           '';

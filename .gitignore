@@ -6,12 +6,13 @@ tmp
 pictures/
 avatars/
 uploads/
-spring200.db
+spring92.db
 .PASSKEY.txt
 !.gitignore
 !LICENSE
 !README.md
 !TODO.md
+!NEW_TODO.org
 !DEPS.md
 !logo/
 !logo/**
