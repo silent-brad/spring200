@@ -29,4 +29,5 @@
 * DONE Update start/stop date
   CLOSED: [2026-03-20 Fri 15:11]
 
-* TODO Deploy to Homelab (also migrate)
+* DONE Deploy to Homelab (also migrate)
+  CLOSED: [2026-03-21 Sat 10:24]

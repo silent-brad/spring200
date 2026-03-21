@@ -39,7 +39,7 @@ def main [old_site: path] {
 
       sqlite3 $new_db $"INSERT INTO family \(email, password_hash, created_at\) VALUES \('($email)', '($hash)', '($ts)'\)"
 
-      let new_id = (open $new_db | query db "SELECT last_insert_rowid() as id").0.id
+      let new_id = (open $new_db | query db $"SELECT id FROM family WHERE email = '($email)'").0.id
       $family_map = ($family_map | insert ($fam.id | into string) $new_id)
       print $"  added ($fam.email)  \(($fam.id) → ($new_id)\)"
     }
@@ -60,7 +60,7 @@ def main [old_site: path] {
 
     sqlite3 $new_db $"INSERT INTO walker \(family_id, name, has_custom_avatar, avatar_filename, created_at\) VALUES \(($new_family_id), '($name)', ($has_av), '($avatar)', '($ts)'\)"
 
-    let new_id = (open $new_db | query db "SELECT last_insert_rowid() as id").0.id
+    let new_id = (open $new_db | query db $"SELECT id FROM walker WHERE family_id = ($new_family_id) AND name = '($name)'").0.id
     $walker_map = ($walker_map | insert ($w.id | into string) $new_id)
     print $"  added ($w.name)  \(($w.id) → ($new_id)\)"
   }
