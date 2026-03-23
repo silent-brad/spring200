@@ -1,4 +1,4 @@
-# Dependencies for Spring 200 Challenge Site
+# Dependencies for Spring92 Challenge Site
 ## Frontend Libraries
 - [HTMX](https://htmx.org)
 - [Chart.js](https://chartjs.org)
