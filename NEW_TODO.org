@@ -1,7 +1,6 @@
 #+TITLE: TODO list for fork
 
 * DONE Switch name
-  Spring200?
   Spring Walking Challenge
 * DONE Design/switch color scheme
   - Yellow primary color

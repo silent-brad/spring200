@@ -38,7 +38,7 @@ proc handle_get_routes*(req: Request, session: Option[Session], db_conn: DbConn)
       headers = new_http_headers([("Location", if session.is_none: "/login" else: "/select-walker")])
     else:
       let current_total = get_user_total_miles(db_conn, session.get().walker_id)
-      let progress_pct = min(current_total / 200.0 * 100.0, 100.0)
+      let progress_pct = min(current_total / 92.0 * 100.0, 100.0)
       # Check for success parameter
       var success_msg: Option[string] = none(string)
       if req.url.query.len > 0:
@@ -54,7 +54,7 @@ proc handle_get_routes*(req: Request, session: Option[Session], db_conn: DbConn)
       headers = new_http_headers([("Location", if session.is_none: "/login" else: "/select-walker")])
     else:
       let current_total = get_user_total_miles(db_conn, session.get().walker_id)
-      let progress_pct = min(current_total / 200.0 * 100.0, 100.0)
+      let progress_pct = min(current_total / 92.0 * 100.0, 100.0)
       response_body = render_template("dashboard.jinja", session, current_total = some(current_total), progress_percent = some(progress_pct))
 
   of "/posts":
@@ -150,7 +150,7 @@ proc handle_get_routes*(req: Request, session: Option[Session], db_conn: DbConn)
         var entry: Entry = Entry(
           walker: walker,
           total_miles: db_entry.total_miles,
-          progress_percent: min(db_entry.total_miles / 200.0 * 100.0, 100.0),
+          progress_percent: min(db_entry.total_miles / 92.0 * 100.0, 100.0),
         )
         user_stats.add(entry)
       
