@@ -8,23 +8,26 @@ from times import DateTime, epochTime, format
 import ../types, ../auth, ../templates, ../utils, ../upload
 import multipart
 
-proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn, PASSKEY: string): Future[(string, HttpCode, HttpHeaders)] {.async.} =
-  let content_length = if req.headers.has_key("content-length"): parse_int($req.headers["content-length"]) else: 0
+proc handle_post_routes*(req: Request, session: Option[Session],
+    db_conn: DbConn, PASSKEY: string): Future[(string, HttpCode,
+    HttpHeaders)] {.async.} =
+  let content_length = if req.headers.has_key("content-length"): parse_int(
+      $req.headers["content-length"]) else: 0
   var body = ""
   if content_length > 0:
     body = req.body
-  
+
   let form_data = parse_form_data(body)
-  
+
   var response_body = ""
   var status = Http200
   var headers = new_http_headers([("Content-Type", "text/html")])
-  
+
   case req.url.path:
   of "/login":
     let email = form_data.get_or_default("email", "").strip()
     let password = form_data.get_or_default("password", "").strip()
-    
+
     if email == "":
       response_body = """<div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">Email is required</div>"""
     elif password == "":
@@ -56,7 +59,7 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
     let passkey = to_upper_ascii(form_data.get_or_default("passkey", "")).strip()
     let email = form_data.get_or_default("email", "").strip()
     let password = form_data.get_or_default("password", "").strip()
-    
+
     if passkey == "":
       response_body = """<div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">Passkey is required</div>"""
     elif email == "":
@@ -73,12 +76,13 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
       try:
         let password_hash = hash_password(password)
         let family_id = create_family_account(db_conn, email, password_hash)
-        
+
         let session_id = generate_session_id()
         {.cast(gcsafe).}:
           with_lock sessions_lock:
-            sessions[session_id] = Session(family_id: family_id, walker_id: 0, email: email, is_family_session: true)
-        
+            sessions[session_id] = Session(family_id: family_id, walker_id: 0,
+                email: email, is_family_session: true)
+
         headers = new_http_headers([
           ("Set-Cookie", "session_id=" & session_id & "; HttpOnly; Path=/"),
           ("HX-Redirect", "/add-walker?success=signup")
@@ -94,15 +98,16 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
       response_body = """<div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">You must be logged in to create walkers</div>"""
     else:
       let name = form_data.get_or_default("name", "").strip()
-      
+
       if name == "":
         response_body = """<div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">Name is required</div>"""
       elif not validate_name(name):
         response_body = """<div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">Invalid name format</div>"""
       else:
         try:
-          let (walker_id, avatar_filename) = create_walker_account(db_conn, session.get().family_id, name)
-          
+          let (walker_id, avatar_filename) = create_walker_account(db_conn,
+              session.get().family_id, name)
+
           # Switch to the new walker
           let new_session = Session(
             family_id: session.get().family_id,
@@ -112,13 +117,13 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
             avatar_filename: avatar_filename,
             is_family_session: false
           )
-          
+
           # Update session
           let session_id = generate_session_id()
           {.cast(gcsafe).}:
             with_lock sessions_lock:
               sessions[session_id] = new_session
-            
+
           headers = new_http_headers([
             ("Set-Cookie", "session_id=" & session_id & "; HttpOnly; Path=/"),
             ("HX-Redirect", "/dashboard?success=walker-created")
@@ -153,25 +158,48 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
     else:
       # Parse multipart form data for file upload
       let multipart_data = await parse_multipart(req)
-      
+
       if multipart_data.error != "":
-        response_body = &"""<p style="color: var(--error-oklch-500);">Error parsing form data: {multipart_data.error}</p>"""
+        if multipart_data.error == "File too large":
+          status = Http413
+          response_body = """<p style="color: var(--error-oklch-500);">The uploaded file is too large. Maximum file size is 10MB.</p>"""
+        elif multipart_data.error == "File type not allowed":
+          status = Http415
+          response_body = """<p style="color: var(--error-oklch-500);">The uploaded file type is not supported. Please use JPG, PNG, GIF, or WebP images.</p>"""
+        else:
+          status = Http400
+          response_body = &"""<p style="color: var(--error-oklch-500);">Error processing your upload: {multipart_data.error}. Please try again.</p>"""
       else:
-        let text_content = sanitize_html(multipart_data.fields.getOrDefault("text_content", "").strip())
+        let text_content = sanitize_html(multipart_data.fields.getOrDefault(
+            "text_content", "").strip())
         var image_filename = ""
+        var upload_error = ""
         if multipart_data.files.has_key("image"):
           let (orig_filename, content_type, file_size) = multipart_data.files["image"]
           let upload_path = "uploads" / orig_filename
           if file_exists(upload_path):
-            let file_data = read_file(upload_path)
-            # Extract extension from original filename
-            let original_ext = if orig_filename.contains("."): orig_filename.split(".")[^1].to_lower_ascii() else: "jpg"
-            image_filename = save_uploaded_file(file_data, original_ext, "pictures")
-            # Clean up the temporary file
-            remove_file(upload_path)
-        
-        if text_content.strip() == "" and image_filename == "":
-          response_body = """<p style="color: var(--error-oklch-500);">Please provide text content or an image</p>"""
+            try:
+              let file_data = read_file(upload_path)
+              # Extract extension from original filename
+              let original_ext = if orig_filename.contains(
+                  "."): orig_filename.split(".")[^1].to_lower_ascii() else: "jpg"
+              image_filename = save_uploaded_file(file_data, original_ext, "pictures")
+              # Clean up the temporary file
+              remove_file(upload_path)
+            except Exception as e:
+              echo "Error processing uploaded file: ", e.msg
+              upload_error = "Failed to process the uploaded image. Please try a different file."
+              # Clean up temp file on error
+              if file_exists(upload_path):
+                remove_file(upload_path)
+          else:
+            upload_error = "The uploaded file could not be saved. Please try again."
+
+        if upload_error != "":
+          status = Http500
+          response_body = &"""<p style="color: var(--error-oklch-500);">{upload_error}</p>"""
+        elif text_content.strip() == "" and image_filename == "":
+          response_body = """<p style="color: var(--error-oklch-500);">Please provide text content or an image for your post.</p>"""
         else:
           try:
             discard create_post(db_conn, session.get().walker_id, text_content, image_filename)
@@ -179,7 +207,8 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
             response_body = """<p style="color: var(--success-oklch-500);">Post created successfully!</p>"""
           except Exception as e:
             echo "Error creating post: ", e.msg
-            response_body = """<p style="color: var(--error-oklch-500);">Error creating post</p>"""
+            status = Http500
+            response_body = """<p style="color: var(--error-oklch-500);">Failed to save your post. Please try again later.</p>"""
 
   of "/settings":
     if session.is_none:
@@ -188,16 +217,19 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
     else:
       # Parse multipart form data for file upload
       let multipart_data = await parse_multipart(req)
-      
+
       if multipart_data.error != "":
         response_body = &"""<p style="color: var(--error-oklch-500);">Error parsing form data: {multipart_data.error}</p>"""
       else:
         # Extract form fields with validation
         let name = multipart_data.fields.get_or_default("name", "").strip()
-        let current_password = multipart_data.fields.get_or_default("current_password", "").strip()
-        let new_password = multipart_data.fields.get_or_default("new_password", "").strip()
-        let confirm_password = multipart_data.fields.get_or_default("confirm_new_password", "").strip()
-        
+        let current_password = multipart_data.fields.get_or_default(
+            "current_password", "").strip()
+        let new_password = multipart_data.fields.get_or_default("new_password",
+            "").strip()
+        let confirm_password = multipart_data.fields.get_or_default(
+            "confirm_new_password", "").strip()
+
         if name == "":
           response_body = """<p style="color: var(--error-oklch-500);">Name is required</p>"""
         elif not validate_name(name):
@@ -210,7 +242,7 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
             let walker = walker_opt.get()
             var success = true
             var error_msg = ""
-            
+
             # Update basic info
             if success:
               try:
@@ -218,18 +250,21 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
               except:
                 success = false
                 error_msg = "Error updating profile"
-            
+
             # Handle avatar upload if provided
             if success and multipart_data.files.has_key("avatar"):
-              let (orig_filename, content_type, file_size) = multipart_data.files["avatar"]
+              let (orig_filename, content_type,
+                file_size) = multipart_data.files["avatar"]
               let upload_path = "uploads" / orig_filename
               if file_exists(upload_path):
                 try:
                   let file_data = read_file(upload_path)
                   # Extract extension from original filename
-                  let original_ext = if orig_filename.contains("."): orig_filename.split(".")[^1].to_lower_ascii() else: "jpg"
+                  let original_ext = if orig_filename.contains(
+                      "."): orig_filename.split(".")[^1].to_lower_ascii() else: "jpg"
                   # Save to avatars directory, allowing overwrite of existing file
-                  let avatar_filename = save_uploaded_file(file_data, original_ext, "avatars")
+                  let avatar_filename = save_uploaded_file(file_data,
+                      original_ext, "avatars")
                   # Clean up the temporary file
                   remove_file(upload_path)
                   # Update walker avatar flag in database
@@ -243,7 +278,7 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
                       if parts.len == 2 and parts[0] == "session_id":
                         current_session_id = parts[1]
                         break
-                  
+
                   if current_session_id != "":
                     {.cast(gcsafe).}:
                       with_lock sessions_lock:
@@ -259,7 +294,7 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
                   echo "Error updating avatar: ", e.msg
                   success = false
                   error_msg = "Error updating avatar"
-            
+
             # Handle password change if provided
             if success and current_password != "" and new_password != "":
               if new_password != confirm_password:
@@ -284,9 +319,10 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
                   except:
                     success = false
                     error_msg = "Error updating password"
-            
+
             if success:
-              headers = new_http_headers([("HX-Redirect", "/dashboard?success=settings")])
+              headers = new_http_headers([("HX-Redirect",
+                  "/dashboard?success=settings")])
               response_body = &"<p style=\"color: var(--success-oklch-500);\">Settings updated successfully!</p>"
             else:
               response_body = &"""<p style="color: var(--error-oklch-500);">{error_msg}</p>"""
@@ -354,5 +390,5 @@ proc handle_post_routes*(req: Request, session: Option[Session], db_conn: DbConn
   else:
     status = Http404
     response_body = "Endpoint not found"
-  
+
   return (response_body, status, headers)

@@ -8,8 +8,8 @@ type
     email*: string
     name*: string
     avatar_filename*: string
-    is_family_session*: bool  # true if logged into family account, false if in walker
-  
+    is_family_session*: bool # true if logged into family account, false if in walker
+
   Walker_Info* = object
     id*: int64
     name*: string

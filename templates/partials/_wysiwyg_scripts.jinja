@@ -224,8 +224,10 @@ document.head.appendChild(style);
 // Reload posts after successful post creation
 document.addEventListener('htmx:afterSwap', function(event) {
 	if (event.detail.target.id === 'post-response') {
+		const responseDiv = event.detail.target;
+		responseDiv.style.display = 'block';
 		// Check if the response contains success message
-		if (event.detail.target.innerHTML.includes('successfully')) {
+		if (responseDiv.innerHTML.includes('successfully')) {
 			// Clear the editor
 			const editor = document.getElementById('text_content_editor');
 			const hiddenTextarea = document.getElementById('text_content');
@@ -239,7 +241,31 @@ document.addEventListener('htmx:afterSwap', function(event) {
 			setTimeout(() => {
 				htmx.trigger('#posts-feed', 'load');
 			}, 500);
+			
+			// Hide success message after a delay
+			setTimeout(() => { responseDiv.style.display = 'none'; }, 3000);
+		} else {
+			// Error response - hide after some time
+			setTimeout(() => { responseDiv.style.display = 'none'; }, 5000);
 		}
+	}
+});
+
+// Handle HTMX response errors (non-2xx status codes) to prevent error text from leaking into UI
+document.addEventListener('htmx:responseError', function(event) {
+	if (event.detail.target && event.detail.target.id === 'post-response') {
+		event.preventDefault();
+		const responseDiv = event.detail.target;
+		const status = event.detail.xhr.status;
+		let msg = 'An error occurred while creating your post.';
+		if (status === 401) msg = 'You must be logged in to create posts.';
+		else if (status === 409) msg = 'A conflict occurred. Please try again.';
+		else if (status === 413) msg = 'The uploaded file is too large. Maximum size is 10MB.';
+		else if (status === 415) msg = 'The uploaded file type is not supported. Please use JPG, PNG, GIF, or WebP.';
+		else if (status >= 500) msg = 'A server error occurred. Please try again later.';
+		responseDiv.innerHTML = '<p style="color: var(--error-oklch-500);">' + msg + '</p>';
+		responseDiv.style.display = 'block';
+		setTimeout(() => { responseDiv.style.display = 'none'; }, 5000);
 	}
 });
 

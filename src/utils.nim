@@ -5,7 +5,7 @@ proc parse_form_data*(body: string): Table[string, string] =
   result = init_table[string, string]()
   if body.len == 0:
     return
-  
+
   for pair in body.split("&"):
     let parts = pair.split("=", 1)
     if parts.len == 2:
@@ -25,7 +25,7 @@ proc html_escape*(s: string): string =
 proc sanitize_html*(html: string): string =
   ## Sanitize HTML content allowing only safe tags and attributes
   result = html
-  
+
   # Remove script tags and their content completely
   var start_pos = 0
   while true:
@@ -38,40 +38,42 @@ proc sanitize_html*(html: string): string =
     else:
       result.delete(script_start..result.len - 1)
       break
-  
+
   # Remove dangerous event handlers (onclick, onload, etc.)
-  let dangerous_attrs = @["onclick", "onload", "onerror", "onmouseover", "onfocus", "onblur", "onkeypress", "onsubmit", "onchange"]
+  let dangerous_attrs = @["onclick", "onload", "onerror", "onmouseover",
+      "onfocus", "onblur", "onkeypress", "onsubmit", "onchange"]
   for attr in dangerous_attrs:
     result = result.replace(attr & "=", "data-removed-" & attr & "=")
-  
+
   # Remove javascript: URLs
   result = result.replace("javascript:", "data-removed-javascript:")
-  
+
   # Remove data: URLs for images (potential XSS vector)
   result = result.replace("data:", "data-removed:")
-  
+
   # Keep only allowed tags: b, i, u, strong, em, a, h1-h6, blockquote, ul, ol, li, p, br, img
   # This is a simple approach - remove any tags not in allowed list
-  let allowed_tags = @["b", "i", "u", "strong", "em", "a", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "cite", "ul", "ol", "li", "p", "br", "img"]
-  
+  let allowed_tags = @["b", "i", "u", "strong", "em", "a", "h1", "h2", "h3",
+      "h4", "h5", "h6", "blockquote", "cite", "ul", "ol", "li", "p", "br", "img"]
+
   # Simple tag validation - remove disallowed tags
   var tag_start = 0
   while true:
     let open_bracket = result.find("<", tag_start)
     if open_bracket == -1: break
-    
+
     let close_bracket = result.find(">", open_bracket)
     if close_bracket == -1: break
-    
+
     let tag_content = result[open_bracket + 1..close_bracket - 1].strip()
     var tag_name = ""
-    
+
     # Extract tag name (handle closing tags and attributes)
     if tag_content.startsWith("/"):
       tag_name = tag_content[1..^1].split(" ")[0].split("\t")[0]
     else:
       tag_name = tag_content.split(" ")[0].split("\t")[0]
-    
+
     # Check if tag is allowed
     if tag_name.toLowerAscii() notin allowed_tags and tag_name != "":
       # Remove the entire tag
@@ -83,7 +85,8 @@ proc sanitize_html*(html: string): string =
         # Only allow href attribute for links, remove others
         let href_start = tag_content.find("href=")
         if href_start != -1:
-          result = result[0..open_bracket] & "a href=" & tag_content[href_start + 5..^1].split(" ")[0] & ">" & result[close_bracket + 1..^1]
+          result = result[0..open_bracket] & "a href=" & tag_content[
+              href_start + 5..^1].split(" ")[0] & ">" & result[close_bracket + 1..^1]
         else:
           result = result[0..open_bracket] & "a>" & result[close_bracket + 1..^1]
       elif tag_name.toLowerAscii() == "img":
@@ -98,15 +101,16 @@ proc sanitize_html*(html: string): string =
           let alt_value = tag_content[alt_start + 4..^1].split(" ")[0]
           if new_attrs.len > 0: new_attrs.add(" ")
           new_attrs.add("alt=" & alt_value)
-        result = result[0..open_bracket] & "img " & new_attrs & ">" & result[close_bracket + 1..^1]
-      
+        result = result[0..open_bracket] & "img " & new_attrs & ">" & result[
+            close_bracket + 1..^1]
+
       tag_start = close_bracket + 1
-  
+
   return result
 
 proc simple_format*(text: string): string =
   ## Convert line breaks to <br> tags for basic formatting
-  result = html_escape(text)  # First escape all HTML to prevent XSS
+  result = html_escape(text) # First escape all HTML to prevent XSS
   result = result.replace("\n", "<br>")
   return result
 

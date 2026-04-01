@@ -25,7 +25,7 @@ proc handle_request(req: Request) {.async, gcsafe.} =
           let parts = cookie.strip().split("=")
           if parts.len == 2 and parts[0] == "session_id":
             session = get_user_from_session(parts[1])
-      
+
       var response_body: string
       var status: HttpCode
       var headers: HttpHeaders
@@ -34,14 +34,15 @@ proc handle_request(req: Request) {.async, gcsafe.} =
       of Http_get:
         (response_body, status, headers) = handle_get_routes(req, session, db_conn)
       of Http_post:
-        (response_body, status, headers) = await handle_post_routes(req, session, db_conn, PASSKEY)
+        (response_body, status, headers) = await handle_post_routes(req,
+            session, db_conn, PASSKEY)
       else:
         status = Http405
         headers = new_http_headers([("Content-Type", "text/html")])
         response_body = "Method not allowed"
-      
+
       await req.respond(status, response_body, headers)
-    
+
     except Exception as e:
       echo "Error: ", e.msg
       await req.respond(Http500, "Internal server error")
@@ -50,9 +51,9 @@ proc main() {.async.} =
   echo "Initializing database..."
   db_conn = init_database()
   echo "Database initialized."
-  
+
   init_lock(sessions_lock)
-  
+
   var server = new_async_http_server()
   echo "Starting Spring92 server on port ", port
   await server.serve(Port(port), handle_request)

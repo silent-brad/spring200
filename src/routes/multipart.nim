@@ -10,12 +10,13 @@ import ../utils
 type
   MultipartData* = object
     fields*: Table[string, string]
-    files*: Table[string, (string, string, int)]  # (filename, contentType, size)
+    files*: Table[string, (string, string, int)] # (filename, contentType, size)
     error*: string
 
 proc parseMultipart*(req: Request): Future[MultipartData] {.async.} =
-  result = MultipartData(fields: initTable[string, string](), files: initTable[string, (string, string, int)](), error: "")
-  
+  result = MultipartData(fields: initTable[string, string](), files: initTable[
+      string, (string, string, int)](), error: "")
+
   if not req.headers.hasKey("content-type"):
     result.error = "Missing Content-Type"
     return
@@ -32,7 +33,8 @@ proc parseMultipart*(req: Request): Future[MultipartData] {.async.} =
   for param in params:
     if param.startsWith("boundary="):
       let boundaryRaw = param[9 .. ^1].strip()
-      boundary = if boundaryRaw.startsWith('"') and boundaryRaw.endsWith('"'): boundaryRaw[1 .. ^2] else: boundaryRaw
+      boundary = if boundaryRaw.startsWith('"') and boundaryRaw.endsWith(
+          '"'): boundaryRaw[1 .. ^2] else: boundaryRaw
       break
   if boundary == "":
     result.error = "Missing boundary"
@@ -45,7 +47,8 @@ proc parseMultipart*(req: Request): Future[MultipartData] {.async.} =
 
   # Split into parts (parts[0] is preamble, last is epilogue)
   let parts = body.split(fullBoundary)
-  if parts.len < 3 or not parts[^1].startsWith("--"):  # At least preamble, one part, epilogue; check final '--' for validity
+  if parts.len < 3 or not parts[^1].startsWith(
+      "--"): # At least preamble, one part, epilogue; check final '--' for validity
     result.error = "Malformed multipart body"
     return
 
@@ -58,7 +61,8 @@ proc parseMultipart*(req: Request): Future[MultipartData] {.async.} =
     if headerEnd == -1: continue
 
     let headerStr = part[0 ..< headerEnd]
-    var partBody = part[headerEnd + 4 .. ^1].strip(trailing = true, chars = {'\r', '\n'})
+    var partBody = part[headerEnd + 4 .. ^1].strip(trailing = true, chars = {
+        '\r', '\n'})
 
     # Parse part headers
     var part_headers = newTable[string, string]()
@@ -94,18 +98,18 @@ proc parseMultipart*(req: Request): Future[MultipartData] {.async.} =
       # File upload - save to disk with proper security checks
       let upload_dir = "uploads"
       if not dir_exists(upload_dir): create_dir(upload_dir)
-      
+
       # Sanitize filename and validate file extension
       let safe_filename = sanitize_filename(filename)
       if not is_safe_file_extension(safe_filename):
         result.error = "File type not allowed"
         return
-      
+
       # Limit file size (10MB)
       if part_body.len > 10_485_760:
         result.error = "File too large"
         return
-        
+
       let path = upload_dir / safe_filename
       write_file(path, part_body)
       result.files[name] = (safe_filename, ctype, part_body.len)

@@ -1,6 +1,7 @@
 <!-- WYSIWYG Editor -->
 <div style="background-color: var(--color-surface); padding: 1.5rem; border-radius: 0.375rem; margin-bottom: 2rem;">
 	<h3>Create a Post</h3>
+	<div id="post-response" style="display: none;"></div>
 	<form hx-post="/post" hx-target="#post-response" hx-swap="innerHTML" hx-encoding="multipart/form-data" id="post-form">
 		<label for="text_content">
 			<!-- WYSIWYG Toolbar -->
@@ -45,5 +46,4 @@
 			<button type="submit" onclick="updateHiddenTextarea()">Post</button>
 		</div>
 	</form>
-	<div id="post-response"></div>
 </div>
