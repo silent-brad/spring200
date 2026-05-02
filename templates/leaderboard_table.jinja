@@ -1,39 +1,33 @@
-{% if user_stats.len() > 0 %}
-	<table>
-		<thead>
-			<tr>
-				<th>Rank</th>
-				<th>Walker</th>
-				<th>Miles</th>
-				<th>Progress</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for (rank, user_stat) in user_stats.pairs() %}
-        {% let walker = user_stat.walker %}
-				<tr>
-					<td class="numbers">{{rank + 1}}</td>
-					<td>
-            {% let name = walker.name %}
-            {% let avatar_filename = walker.avatar_filename %}
-            {% importnimja "partials/_walker_avatar.jinja" %}
-					</td>
-					<td><strong class="numbers">{{user_stat.total_miles}}</strong></td>
-					<td>
-						<div style="display: flex; align-items: center; gap: 0.5rem;">
-							{% let progress_percent = user_stat.progress_percent %}
-              <div style="width: 1rem;">
-                {% importnimja "partials/_progress_bar.jinja" %}
-              </div>
-							<small class="numbers">{{progress_percent.int}}%</small>
-						</div>
-					</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-{% else %}
-	<p style="text-align: center; color: var(--color-text-muted); margin: 2rem 0;">
-		No walkers yet. Be the first to <a href="/signup">sign up</a>!
-	</p>
+{% for (rank, user_stat) in user_stats.pairs() %}
+	{% let walker = user_stat.walker %}
+	<tr>
+		<td class="numbers">{{offset + rank + 1}}</td>
+		<td>
+			{% let name = walker.name %}
+			{% let avatar_filename = walker.avatar_filename %}
+			{% importnimja "partials/_walker_avatar.jinja" %}
+		</td>
+		<td><strong class="numbers">{{user_stat.total_miles}}</strong></td>
+		<td>
+			<div class="progress-cell">
+				{% let progress_percent = user_stat.progress_percent %}
+				<div class="progress-bar-wrap">
+					{% importnimja "partials/_progress_bar.jinja" %}
+				</div>
+				<small class="numbers">{{progress_percent.int}}%</small>
+			</div>
+		</td>
+	</tr>
+{% endfor %}
+{% if has_more %}
+	<tr id="load-more-leaderboard"
+		hx-get="/api/leaderboard-table?page={{next_page}}"
+		hx-trigger="click"
+		hx-target="this"
+		hx-swap="outerHTML"
+	>
+		<td colspan="4">
+			<button class="btn load-more-btn">Load More</button>
+		</td>
+	</tr>
 {% endif %}

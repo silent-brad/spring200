@@ -64,6 +64,34 @@ proc update_mile_entry*(db: DbConn, entry_id: int64, miles: float) =
 proc delete_mile_entry*(db: DbConn, entry_id: int64) =
   db.exec(sql"DELETE FROM mile_entry WHERE id = ?", entry_id)
 
+proc get_leaderboard_paginated*(db: DbConn, limit: int, offset: int): seq[
+    tuple[walker: Walker, total_miles: float]] =
+  let rows = db.getAllRows(sql"""
+    SELECT r.id, r.name, r.created_at, r.family_id, r.has_custom_avatar, r.avatar_filename, COALESCE(SUM(m.miles), 0) as total_miles
+    FROM walker r
+    LEFT JOIN mile_entry m ON r.id = m.walker_id
+    GROUP BY r.id
+    ORDER BY total_miles DESC
+    LIMIT ? OFFSET ?
+  """, limit, offset)
+
+  var leaderboard: seq[tuple[walker: Walker, total_miles: float]] = @[]
+
+  for row in rows:
+    let walker = Walker(
+      id: parse_biggest_int(row[0]),
+      name: row[1],
+      created_at: row[2].parse("yyyy-MM-dd HH:mm:ss"),
+      family_id: parse_biggest_int(row[3]),
+      has_custom_avatar: row[4] == "1",
+      avatar_filename: row[5]
+    )
+    let total_miles = parse_float(row[6])
+
+    leaderboard.add((walker, total_miles))
+
+  return leaderboard
+
 proc get_leaderboard*(db: DbConn): seq[tuple[walker: Walker,
     total_miles: float]] =
   let rows = db.getAllRows(sql"""

@@ -22,36 +22,25 @@
 	{% endif %}
 	
 	<div id="leaderboard-table" class="overflow-auto">
-		<!-- Leaderboard table will be loaded here -->
-		<div style="text-align: center; padding: 2rem;">
-			<div aria-busy="true">Loading leaderboard...</div>
-		</div>
+		{% if user_stats.len() > 0 %}
+			<table>
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Walker</th>
+						<th>Miles</th>
+						<th>Progress</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% importnimja "leaderboard_table.jinja" %}
+				</tbody>
+			</table>
+		{% else %}
+			<p style="text-align: center; color: var(--color-text-muted); margin: 2rem 0;">
+				No walkers yet. Be the first to <a href="/signup">sign up</a>!
+			</p>
+		{% endif %}
 	</div>
 </article>
 {%endblock%}
-
-{% block extra_js %}
-<script>
-	async function loadLeaderboardTable() {
-		try {
-			const response = await fetch('/api/leaderboard-table');
-			if (response.ok) {
-				const html = await response.text();
-				document.getElementById('leaderboard-table').innerHTML = html;
-			} else {
-				document.getElementById('leaderboard-table').innerHTML =
-					'<p style="text-align: center; color: var(--color-text-muted); margin: 2rem 0;">Error loading leaderboard</p>';
-			}
-		} catch (error) {
-			document.getElementById('leaderboard-table').innerHTML =
-				'<p style="text-align: center; color: var(--color-text-muted); margin: 2rem 0;">Error loading leaderboard</p>';
-		}
-	}
-
-	// Load leaderboard on page load
-	document.addEventListener('DOMContentLoaded', loadLeaderboardTable);
-
-	// Auto-refresh leaderboard every 30 seconds
-	setInterval(loadLeaderboardTable, 30000);
-</script>
-{% endblock %}

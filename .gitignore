@@ -36,6 +36,7 @@ spring92.db
 
 !sql
 !sql/**.sql
+!sql/**.nu
 
 !reset_password.sh
 

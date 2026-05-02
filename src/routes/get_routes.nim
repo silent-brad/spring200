@@ -4,7 +4,7 @@ import ../database/[models, families, walkers, miles, posts]
 import db_connector/db_sqlite
 import locks
 import os
-from times import DateTime, epochTime, format
+from times import DateTime, epoch_time, format
 import ../types, ../auth, ../templates, ../utils
 
 proc handle_get_routes*(req: Request, session: Option[Session],
@@ -32,7 +32,26 @@ proc handle_get_routes*(req: Request, session: Option[Session],
           success_msg = some("Welcome to Spring92!")
         elif "success=login" in req.url.query:
           success_msg = some("Welcome back to Spring92!")
-      response_body = render_leaderboard(session, success_msg)
+      const page_size = 15
+      let leaderboard = get_leaderboard_paginated(db_conn, page_size + 1, 0)
+      let has_more = leaderboard.len > page_size
+      let display_leaderboard = if has_more: leaderboard[0 ..< page_size] else: leaderboard
+      var user_stats: seq[Entry] = @[]
+      for db_entry in display_leaderboard:
+        let walker = Walker_Info(
+          id: db_entry.walker.id,
+          name: db_entry.walker.name,
+          avatar_filename: db_entry.walker.avatar_filename,
+        )
+        let entry = Entry(
+          walker: walker,
+          total_miles: db_entry.total_miles,
+          progress_percent: min(db_entry.total_miles / 92.0 * 100.0, 100.0),
+        )
+        user_stats.add(entry)
+      response_body = render_leaderboard(session, success_msg,
+          user_stats = user_stats, has_more = has_more,
+          next_page = 2, offset = 0, current_page = 1)
 
   of "/dashboard":
     if session.is_none or session.get().is_family_session:
@@ -70,7 +89,12 @@ proc handle_get_routes*(req: Request, session: Option[Session],
       headers = new_http_headers([("Location",
           if session.is_none: "/login" else: "/select-walker")])
     else:
-      response_body = render_posts_page(@[], session)
+      const page_size = 10
+      let posts = get_posts_paginated(db_conn, page_size + 1, 0)
+      let has_more = posts.len > page_size
+      let display_posts = if has_more: posts[0 ..< page_size] else: posts
+      response_body = render_posts_page(display_posts, session,
+          has_more = has_more, next_page = 2)
 
   of "/logout":
     if session.is_some:
@@ -84,7 +108,7 @@ proc handle_get_routes*(req: Request, session: Option[Session],
       headers = new_http_headers([("Location", "/")])
 
   of "/about":
-    let user_id_opt = if session.isSome: some(session.get().walker_id) else: none(int64)
+    let user_id_opt = if session.is_some: some(session.get().walker_id) else: none(int64)
     response_body = render_template("about.jinja", session,
         walker_id = user_id_opt)
 
@@ -156,21 +180,31 @@ proc handle_get_routes*(req: Request, session: Option[Session],
       headers = new_http_headers([("Location",
           if session.is_none: "/login" else: "/select-walker")])
     else:
-      let leaderboard = get_leaderboard(db_conn)
+      const page_size = 15
+      var page = 1
+      if req.url.query.len > 0 and req.url.query.starts_with("page="):
+        try: page = parse_int(req.url.query[5..^1])
+        except: discard
+      let offset = (page - 1) * page_size
+      let leaderboard = get_leaderboard_paginated(db_conn, page_size + 1, offset)
+      let has_more = leaderboard.len > page_size
+      let display_leaderboard = if has_more: leaderboard[0 ..< page_size] else: leaderboard
       var user_stats: seq[Entry] = @[]
-      for db_entry in leaderboard:
-        var id: int64 = db_entry.walker.id
-        var name: string = db_entry.walker.name
-        var walker: Walker_Info = Walker_Info(id: id, name: name,
-            avatar_filename: db_entry.walker.avatar_filename)
-        var entry: Entry = Entry(
+      for db_entry in display_leaderboard:
+        let walker = Walker_Info(
+          id: db_entry.walker.id,
+          name: db_entry.walker.name,
+          avatar_filename: db_entry.walker.avatar_filename,
+        )
+        let entry = Entry(
           walker: walker,
           total_miles: db_entry.total_miles,
           progress_percent: min(db_entry.total_miles / 92.0 * 100.0, 100.0),
         )
         user_stats.add(entry)
-
-      response_body = render_leaderboard_table(user_stats)
+      response_body = render_leaderboard_table(user_stats,
+          has_more = has_more, next_page = page + 1,
+          offset = offset, current_page = page)
 
   of "/api/user-miles-data":
     if session.is_none or session.get().is_family_session:
@@ -212,8 +246,17 @@ proc handle_get_routes*(req: Request, session: Option[Session],
       headers = new_http_headers([("Location",
           if session.is_none: "/login" else: "/select-walker")])
     else:
-      let posts = get_all_posts(db_conn)
-      response_body = render_post_feed(posts)
+      const page_size = 10
+      var page = 1
+      if req.url.query.len > 0 and req.url.query.starts_with("page="):
+        try: page = parse_int(req.url.query[5..^1])
+        except: discard
+      let offset = (page - 1) * page_size
+      let posts = get_posts_paginated(db_conn, page_size + 1, offset)
+      let has_more = posts.len > page_size
+      let display_posts = if has_more: posts[0 ..< page_size] else: posts
+      response_body = render_post_feed(display_posts, has_more = has_more,
+          next_page = page + 1, session = session)
 
   # Handle switch-walker/ID routes
   elif req.url.path.starts_with("/switch-walker/"):

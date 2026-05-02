@@ -4,7 +4,7 @@ import os
 import types
 import strutils
 import utils
-from times import DateTime, epochTime, format
+from times import DateTime, epoch_time, format
 
 const base_dir = get_script_dir() & "/../templates/"
 
@@ -18,10 +18,15 @@ proc render_template*(template_name: static string, session: Option[
   compile_template_file(template_name, base_dir)
 
 proc render_leaderboard*(session: Option[Session] = none(Session),
-    success_message: Option[string] = none(string)): string {.gcsafe.} =
+    success_message: Option[string] = none(string),
+    user_stats: seq[Entry] = @[], has_more: bool = false,
+    next_page: int = 2, offset: int = 0,
+    current_page: int = 1): string {.gcsafe.} =
   compile_template_file("leaderboard.jinja", base_dir)
 
-proc render_leaderboard_table*(user_stats: seq[Entry]): string {.gcsafe.} =
+proc render_leaderboard_table*(user_stats: seq[Entry] = @[],
+    has_more: bool = false, next_page: int = 2, offset: int = 0,
+    current_page: int = 1): string {.gcsafe.} =
   compile_template_file("leaderboard_table.jinja", base_dir)
 
 proc render_settings*(walker: Option[Walker_Info], session: Option[
@@ -30,10 +35,11 @@ proc render_settings*(walker: Option[Walker_Info], session: Option[
   compile_template_file("settings.jinja", base_dir)
 
 proc render_posts_page*(posts: seq[Post], session: Option[Session] = none(
-    Session)): string {.gcsafe.} =
+    Session), has_more: bool = false, next_page: int = 2): string {.gcsafe.} =
   compile_template_file("posts.jinja", base_dir)
 
-proc render_post_feed*(posts: seq[Post]): string {.gcsafe.} =
+proc render_post_feed*(posts: seq[Post], has_more: bool = false,
+    next_page: int = 2, session: Option[Session] = none(Session)): string {.gcsafe.} =
   compile_template_file("post_feed.jinja", base_dir)
 
 proc render_walker_selection*(walkers: seq[Walker_Info], session: Option[

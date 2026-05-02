@@ -1,26 +1,39 @@
-{% if posts.len > 0 %}
-	{% for post in posts %}
-		<div class="post-card">
-			<div style="margin-bottom: 0.5rem;">
-        {% let name = post.name %}
-        {% let avatar_filename = post.avatar_filename %}
-        {% importnimja "partials/_walker_avatar.jinja" %}
-				<small class="numbers" style="color: var(--color-text-muted); margin-left: 0.5rem;">{{post.created_at.format_date_with_ordinal()}}</small>
+{% for post in posts %}
+	<div class="post-card" id="post-card-{{post.id}}">
+		<div class="post-header">
+			<div class="post-meta">
+				{% let name = post.name %}
+				{% let avatar_filename = post.avatar_filename %}
+				{% importnimja "partials/_walker_avatar.jinja" %}
+				<small class="numbers post-date">{{post.created_at.format_date_with_ordinal()}}</small>
 			</div>
-			
-			<div style="margin-bottom: 0.5rem;">{{post.text_content}}</div>
-			
-			{% if post.image_filename != "" %}
-				<div style="margin: 0.5rem 0;">
-					<img
-						src="/pictures/{{post.image_filename}}"
-						alt="Post image"
-						style="max-width: 100%; height: auto; border-radius: 0.375rem;"
-					>
+			{% if session.is_some() and post.walker_id == session.get().walker_id %}
+				<div class="post-actions">
+					<button class="secondary outline post-action-btn" onclick="editPost({{post.id}})">Edit</button>
+					<button class="secondary outline post-action-btn delete" onclick="deletePost({{post.id}})">Delete</button>
 				</div>
 			{% endif %}
 		</div>
-	{% endfor %}
-{% else %}
-	<p>No posts yet. Be the first to share something!</p>
+		
+		<div class="post-text-content">{{post.text_content}}</div>
+		
+		{% if post.image_filename != "" %}
+			<div class="post-image">
+				<img
+					src="/pictures/{{post.image_filename}}"
+					alt="Post image"
+				>
+			</div>
+		{% endif %}
+	</div>
+{% endfor %}
+{% if has_more %}
+	<div id="load-more-posts"
+		hx-get="/api/post-feed?page={{next_page}}"
+		hx-trigger="click"
+		hx-target="this"
+		hx-swap="outerHTML"
+	>
+		<button class="btn load-more-btn">Load More</button>
+	</div>
 {% endif %}

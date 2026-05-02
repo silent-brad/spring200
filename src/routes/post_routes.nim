@@ -327,6 +327,91 @@ proc handle_post_routes*(req: Request, session: Option[Session],
             else:
               response_body = &"""<p style="color: var(--error-oklch-500);">{error_msg}</p>"""
 
+  of "/edit-post":
+    if session.is_none or session.get().is_family_session:
+      status = Http401
+      response_body = """<p style="color: var(--error-oklch-500);">You must be logged in to edit posts</p>"""
+    else:
+      let multipart_data = await parse_multipart(req)
+
+      if multipart_data.error != "":
+        if multipart_data.error == "File too large":
+          status = Http413
+          response_body = """<p style="color: var(--error-oklch-500);">The uploaded file is too large. Maximum file size is 10MB.</p>"""
+        elif multipart_data.error == "File type not allowed":
+          status = Http415
+          response_body = """<p style="color: var(--error-oklch-500);">The uploaded file type is not supported. Please use JPG, PNG, GIF, or WebP images.</p>"""
+        else:
+          status = Http400
+          response_body = &"""<p style="color: var(--error-oklch-500);">Error processing your upload: {multipart_data.error}. Please try again.</p>"""
+      else:
+        let post_id_str = multipart_data.fields.get_or_default("post_id", "")
+        try:
+          let post_id = parse_biggest_int(post_id_str)
+          let post = get_post_by_id(db_conn, post_id)
+          if post.walker_id != session.get().walker_id:
+            status = Http403
+            response_body = """<p style="color: var(--error-oklch-500);">You can only edit your own posts</p>"""
+          else:
+            let text_content = sanitize_html(multipart_data.fields.getOrDefault(
+                "text_content", "").strip())
+            var image_filename = post.image_filename
+            let remove_image = multipart_data.fields.get_or_default("remove_image", "") == "1"
+
+            if remove_image:
+              if image_filename != "" and file_exists("pictures" / image_filename):
+                remove_file("pictures" / image_filename)
+              image_filename = ""
+
+            if multipart_data.files.has_key("image"):
+              let (orig_filename, content_type, file_size) = multipart_data.files["image"]
+              let upload_path = "uploads" / orig_filename
+              if file_exists(upload_path):
+                try:
+                  let file_data = read_file(upload_path)
+                  let original_ext = if orig_filename.contains(
+                      "."): orig_filename.split(".")[^1].to_lower_ascii() else: "jpg"
+                  # Remove old image if replacing
+                  if post.image_filename != "" and file_exists("pictures" / post.image_filename):
+                    remove_file("pictures" / post.image_filename)
+                  image_filename = save_uploaded_file(file_data, original_ext, "pictures")
+                  remove_file(upload_path)
+                except Exception as e:
+                  echo "Error processing uploaded file: ", e.msg
+                  if file_exists(upload_path):
+                    remove_file(upload_path)
+
+            if text_content.strip() == "" and image_filename == "":
+              response_body = """<p style="color: var(--error-oklch-500);">Please provide text content or an image for your post.</p>"""
+            else:
+              update_post(db_conn, post_id, text_content, image_filename)
+              headers = new_http_headers([("HX-Redirect", "/posts")])
+              response_body = """<p style="color: var(--success-oklch-500);">Post updated successfully!</p>"""
+        except:
+          response_body = """<p style="color: var(--error-oklch-500);">Invalid post</p>"""
+
+  of "/delete-post":
+    if session.is_none or session.get().is_family_session:
+      status = Http401
+      response_body = """<p style="color: var(--error-oklch-500);">You must be logged in to delete posts</p>"""
+    else:
+      let post_id_str = form_data.get_or_default("post_id", "")
+      try:
+        let post_id = parse_biggest_int(post_id_str)
+        let post = get_post_by_id(db_conn, post_id)
+        if post.walker_id != session.get().walker_id:
+          status = Http403
+          response_body = """<p style="color: var(--error-oklch-500);">You can only delete your own posts</p>"""
+        else:
+          # Remove associated image file
+          if post.image_filename != "" and file_exists("pictures" / post.image_filename):
+            remove_file("pictures" / post.image_filename)
+          delete_post(db_conn, post_id)
+          headers = new_http_headers([("HX-Redirect", "/posts")])
+          response_body = """<p style="color: var(--success-oklch-500);">Post deleted successfully!</p>"""
+      except:
+        response_body = """<p style="color: var(--error-oklch-500);">Invalid post</p>"""
+
   of "/edit-miles":
     if session.is_none or session.get().is_family_session:
       status = Http401

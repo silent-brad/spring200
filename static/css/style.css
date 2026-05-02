@@ -1121,6 +1121,7 @@ border-radius: 0.375rem;
 
 .landing-content::blockquote cite {
   color: var(--neutral-oklch-500);
+}
 
 .landing-content a[role="button"] {
   background-color: oklch(from var(--color-button-primary) l c h / 0.8);
@@ -1146,9 +1147,96 @@ border-radius: 0.375rem;
   background-color: oklch(from var(--color-button-secondary-hover) l c h / 0.9);
 }
 
-.post-card {
-  border: 1px solid var(--color-border-light);
+.post-feed-container {
+  padding: 1.5rem;
   border-radius: var(--radius);
-  padding: 1rem;
-  padding-bottom: 1rem; margin-bottom: 1rem;
+}
+
+.post-card {
+  background-color: var(--color-surface-variant);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.post-card .post-image {
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.post-card .post-image img {
+  max-width: 80%;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  border-radius: var(--radius);
+}
+
+.post-header {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+}
+
+.post-date {
+  color: var(--color-text-muted);
+  margin-left: 0.5rem;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.post-action-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--neutral-oklch-50);
+  min-height: auto;
+}
+
+.post-action-btn.delete {
+  background-color: var(--error-oklch-500);
+}
+
+.post-text-content {
+  margin-bottom: 0.5rem;
+}
+
+.load-more-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-bar-wrap {
+  width: 1rem;
+}
+
+#load-more-leaderboard {
+  cursor: pointer;
+}
+
+#load-more-leaderboard td {
+  padding: 0;
+  border-bottom: none;
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: min(1400px, 100vw - 2rem);
+  }
 }
