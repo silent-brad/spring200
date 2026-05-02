@@ -178,6 +178,13 @@ proc is_safe_file_extension*(filename: string): bool =
   let ext = filename.split_file().ext.to_lower_ascii()
   return ext in allowed_extensions
 
+proc fmtMiles*(miles: float): string =
+  ## Format miles for display, rounding to 1 decimal place and stripping trailing .0
+  let s = formatFloat(miles, ffDecimal, 1)
+  if s.endsWith(".0"):
+    return s[0 .. ^3]
+  return s
+
 proc format_date_with_ordinal*(dt: DateTime): string =
   ## Format date like "9:02pm, Dec 12th, 2025" with lowercase am/pm
   let day = dt.monthday()

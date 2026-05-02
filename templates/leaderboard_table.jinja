@@ -7,7 +7,7 @@
 			{% let avatar_filename = walker.avatar_filename %}
 			{% importnimja "partials/_walker_avatar.jinja" %}
 		</td>
-		<td><strong class="numbers">{{user_stat.total_miles}}</strong></td>
+		<td><strong class="numbers">{{fmtMiles(user_stat.total_miles)}}</strong></td>
 		<td>
 			<div class="progress-cell">
 				{% let progress_percent = user_stat.progress_percent %}

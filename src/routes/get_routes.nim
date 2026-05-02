@@ -226,13 +226,13 @@ proc handle_get_routes*(req: Request, session: Option[Session],
           dates_json.add(",")
           miles_json.add(",")
         dates_json.add("\"" & entry.date & "\"")
-        miles_json.add($entry.miles)
+        miles_json.add(fmtMiles(entry.miles))
 
       for i, entry in recent_entries:
         if i > 0:
           entries_json.add(",")
         let formatted_date = format_date_with_ordinal(entry.logged_at)
-        entries_json.add(&"""{{"id": {entry.id}, "date": "{formatted_date}", "miles": {entry.miles}}}""")
+        entries_json.add(&"""{{"id": {entry.id}, "date": "{formatted_date}", "miles": {fmtMiles(entry.miles)}}}""")
 
       dates_json.add("]")
       miles_json.add("]")

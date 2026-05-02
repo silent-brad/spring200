@@ -37,7 +37,7 @@
 	{% if current_total.is_some() %}
 		<div style="margin-bottom: 2rem; text-align: center; padding: 1.5rem; background-color: var(--color-surface); border-radius: 0.375rem;">
 			<h2>Your Progress</h2>
-			<h3 class="numbers" style="font-size: 2rem; color: var(--color-primary);">{{current_total.get()}}</h3>
+			<h3 class="numbers" style="font-size: 2rem; color: var(--color-primary);">{{fmtMiles(current_total.get())}}</h3>
 			<p class="numbers" style="margin: 0;">out of 92 miles</p>
 			{% if progress_percent.is_some() %}
 			{% let progress_percent = progress_percent.get() %}
