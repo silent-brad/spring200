@@ -1,5 +1,5 @@
 import strutils, uri, tables, os
-from times import DateTime, format, monthday, initTime
+from times import DateTime, format, monthday, init_time
 
 proc parse_form_data*(body: string): Table[string, string] =
   result = init_table[string, string]()
@@ -69,19 +69,19 @@ proc sanitize_html*(html: string): string =
     var tag_name = ""
 
     # Extract tag name (handle closing tags and attributes)
-    if tag_content.startsWith("/"):
+    if tag_content.starts_with("/"):
       tag_name = tag_content[1..^1].split(" ")[0].split("\t")[0]
     else:
       tag_name = tag_content.split(" ")[0].split("\t")[0]
 
     # Check if tag is allowed
-    if tag_name.toLowerAscii() notin allowed_tags and tag_name != "":
+    if tag_name.to_lower_ascii() notin allowed_tags and tag_name != "":
       # Remove the entire tag
       result.delete(open_bracket..close_bracket)
       tag_start = open_bracket
     else:
       # For allowed tags, sanitize attributes
-      if tag_name.toLowerAscii() == "a":
+      if tag_name.to_lower_ascii() == "a":
         # Only allow href attribute for links, remove others
         let href_start = tag_content.find("href=")
         if href_start != -1:
@@ -89,7 +89,7 @@ proc sanitize_html*(html: string): string =
               href_start + 5..^1].split(" ")[0] & ">" & result[close_bracket + 1..^1]
         else:
           result = result[0..open_bracket] & "a>" & result[close_bracket + 1..^1]
-      elif tag_name.toLowerAscii() == "img":
+      elif tag_name.to_lower_ascii() == "img":
         # Only allow src and alt attributes for images
         var new_attrs = ""
         let src_start = tag_content.find("src=")
@@ -158,7 +158,7 @@ proc validate_email*(email: string): bool =
     return false
   # Check for basic allowed characters
   for c in email:
-    if not (c.isAlphaNumeric() or c in "@.-_+"):
+    if not (c.is_alpha_numeric() or c in "@.-_+"):
       return false
   return true
 
@@ -178,12 +178,24 @@ proc is_safe_file_extension*(filename: string): bool =
   let ext = filename.split_file().ext.to_lower_ascii()
   return ext in allowed_extensions
 
-proc fmtMiles*(miles: float): string =
+proc fmt_miles*(miles: float): string =
   ## Format miles for display, rounding to 1 decimal place and stripping trailing .0
-  let s = formatFloat(miles, ffDecimal, 1)
-  if s.endsWith(".0"):
+  let s = format_float(miles, ff_decimal, 1)
+  if s.ends_with(".0"):
     return s[0 .. ^3]
   return s
+
+proc error_div*(msg: string): string =
+  """<div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">""" & msg & "</div>"
+
+proc success_div*(msg: string): string =
+  """<div class="success" style="background-color: var(--success-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">""" & msg & "</div>"
+
+proc html_error*(msg: string): string =
+  """<p style="color: var(--error-oklch-500);">""" & msg & "</p>"
+
+proc html_success*(msg: string): string =
+  """<p style="color: var(--success-oklch-500);">""" & msg & "</p>"
 
 proc format_date_with_ordinal*(dt: DateTime): string =
   ## Format date like "9:02pm, Dec 12th, 2025" with lowercase am/pm
