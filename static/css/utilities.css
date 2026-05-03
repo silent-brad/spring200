@@ -1,0 +1,69 @@
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.hidden {
+  display: none;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.small-input {
+  padding: 0.25rem;
+}
+
+.avatar-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avatar-name {
+  font-weight: bold;
+}
+
+.progress-bar-wrap .progress-bar {
+  background-color: var(--color-border-light);
+  border-radius: 6px;
+  height: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.progress-bar-wrap .progress-fill {
+  background-color: var(--color-primary);
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 6px;
+}
+
+.no-walkers {
+  text-align: center;
+  color: var(--color-text-muted);
+  margin: 2rem 0;
+}

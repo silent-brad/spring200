@@ -10,13 +10,13 @@
   </div>
 
   {% if success_message.is_some() %}
-  <div class="success" style="background-color: var(--success-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+  <div class="success solid">
     {{ success_message.get() }}
   </div>
   {% endif %}
 
   {% if error_message.is_some() %}
-  <div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+  <div class="error solid">
     {{ error_message.get() }}
   </div>
   {% endif %}
@@ -29,12 +29,12 @@
         {% let name = walker.name %}
         {% let avatar_filename = walker.avatar_filename %}
         {% importnimja "partials/_walker_avatar.jinja" %}
-        <div style="font-size: 1.5rem; opacity: 0.5;">→</div>
+        <div class="walker-arrow">→</div>
       </a>
       {% endfor %}
 
       <a href="/add-walker" class="add-walker-btn">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">+</div>
+        <div class="add-walker-icon">+</div>
         <strong>Add New Walker</strong>
         <br>
         <small>Create a new walker account for another family member</small>
@@ -42,7 +42,7 @@
       {% else %}
       <p>No walker accounts found. Let's create your first one!</p>
       <a href="/add-walker" class="add-walker-btn">
-        <div style="font-size: 2rem; margin-bottom: 0.5rem;">+</div>
+        <div class="add-walker-icon">+</div>
         <strong>Create Your First Walker</strong>
         <br>
         <small>Start tracking your miles by creating a walker account</small>

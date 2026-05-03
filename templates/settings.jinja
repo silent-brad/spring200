@@ -11,25 +11,13 @@
 	
   <div id="settings-messages">
 	{% if error_message.is_some() %}
-		<div class="error" style="
-			background-color: var(--error-oklch-500);
-      color: var(--neutral-oklch-50);
-      padding: 1rem;
-      border-radius: 0.375rem;
-			margin-bottom: 1rem;
-		">
+		<div class="error solid">
 			{{error_message.get()}}
 		</div>
 	{% endif %}
 	
 	{% if success_message.is_some() %}
-		<div class="success" style="
-			background-color: var(--success-oklch-500);
-			color: var(--neutral-oklch-50);
-			padding: 1rem;
-			border-radius: 0.375rem;
-			margin-bottom: 1rem;
-		">
+		<div class="success solid">
 			{{success_message.get()}}
 		</div>
 	{% endif %}
@@ -39,8 +27,8 @@
 		hx-post="/settings"
 		hx-target="#settings-messages"
 		hx-swap="innerHTML">
-		<div style="text-align: center; margin-bottom: 2rem;">
-			<div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin: 1rem 0;">
+		<div class="settings-avatar">
+			<div class="settings-avatar-flex">
 				{% if walker.is_some() %}
           {% let walker = walker.get() %}
           {% let name = walker.name %}
@@ -135,20 +123,12 @@
 		<button type="submit">Save Changes</button>
 	</form>
 	
-	<section style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--neutral-oklch-300);">
-		<h2 style="color: var(--error-oklch-500); margin-bottom: 1rem;">Danger Zone</h2>
-		<p style="margin-bottom: 1rem; color: var(--neutral-oklch-600);">
+	<section class="danger-zone">
+		<h2>Danger Zone</h2>
+		<p>
 			Once you delete your walker account, there is no going back. Please be certain.
 		</p>
-		<a href="/delete-walker" style="
-			background-color: var(--error-oklch-500);
-			color: var(--neutral-oklch-50);
-			padding: 0.75rem 1.5rem;
-			text-decoration: none;
-			border-radius: 0.375rem;
-			display: inline-block;
-			font-weight: 500;
-		">Delete Walker Account</a>
+		<a href="/delete-walker" role="button" class="btn-danger">Delete Walker Account</a>
 	</section>
 </article>
 {% endblock %}

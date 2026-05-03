@@ -1,0 +1,184 @@
+/* Page-specific styles */
+
+/* 404 Page */
+.page-404 {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.page-404 h1 {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.page-404 h2 {
+  margin-bottom: 2rem;
+  color: var(--color-text-muted);
+}
+
+.page-404 p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.page-404 .btn-group {
+  margin-top: 3rem;
+}
+
+.page-404 .btn-group a {
+  margin: 0 0.5rem;
+}
+
+/* About page */
+.about-actions {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+/* Dashboard page */
+.dashboard-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.progress-overview {
+  margin-bottom: 2rem;
+  text-align: center;
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border-radius: 0.375rem;
+}
+
+.progress-num {
+  font-size: 2rem;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.progress-num-label {
+  margin: 0;
+}
+
+.progress-num-percent {
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-card {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: 0.375rem;
+}
+
+.mile-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.mile-btn {
+  width: 40px;
+}
+
+.activity-container {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: 0.375rem;
+}
+
+/* Dashboard table and edit forms (JS generated) */
+.miles-cell {
+  text-align: right;
+}
+
+.entry-actions {
+  text-align: right;
+}
+
+.edit-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--neutral-oklch-50);
+}
+
+.save-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  background-color: var(--success-oklch-500);
+  color: var(--neutral-oklch-50);
+}
+
+.delete-btn-inline {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  background-color: var(--error-oklch-500);
+  color: var(--neutral-oklch-50);
+}
+
+.cancel-btn-inline {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--neutral-oklch-50);
+}
+
+.edit-form {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: flex-end;
+}
+
+.edit-miles-input {
+  width: 80px;
+  margin: 0;
+  padding: 0.25rem;
+}
+
+/* Delete walker page */
+.delete-page h1 {
+  color: var(--error-oklch-500);
+}
+
+.delete-form {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+/* Select walker page */
+.select-walker .welcome-text,
+.add-walker .welcome-text {
+  margin-bottom: 1.5rem;
+}
+
+.walker-arrow {
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+
+.add-walker-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Settings page */
+.settings-avatar {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.settings-avatar-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}

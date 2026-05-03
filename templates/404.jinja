@@ -3,11 +3,11 @@
 {% block title %}Page Not Found{% endblock %}
 
 {% block content %}
-<section style="text-align: center; padding: 4rem 0;">
-	<h1 style="font-size: 4rem; margin-bottom: 1rem;">404</h1>
-	<h2 style="margin-bottom: 2rem; color: var(--muted-color);">Page Not Found</h2>
+<section class="page-404">
+	<h1>404</h1>
+	<h2>Page Not Found</h2>
 	
-	<p style="font-size: 1.1rem; margin-bottom: 2rem;">
+	<p>
 		The page you're looking for doesn't exist or has been moved.
 	</p>
 	
@@ -16,9 +16,9 @@
 		<cite>— J.R.R. Tolkien</cite>
 	</blockquote>
 	
-	<div style="margin-top: 3rem;">
-		<a href="/" role="button" style="margin: 0 0.5rem;">Go Home</a>
-		<a href="/dashboard" role="button" class="secondary" style="margin: 0 0.5rem;">Dashboard</a>
+	<div class="btn-group">
+		<a href="/" role="button">Go Home</a>
+		<a href="/dashboard" role="button" class="secondary">Dashboard</a>
 	</div>
 </section>
 {% endblock %}

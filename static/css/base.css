@@ -1,0 +1,202 @@
+/* CSS Custom Properties for theming */
+:root {
+  /* Spacing system */
+  --space-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+  --space-sm: clamp(0.5rem, 1vw, 0.75rem);
+  --space-md: clamp(0.75rem, 1.5vw, 1.25rem);
+  --space-lg: clamp(1.25rem, 2.5vw, 2rem);
+  --space-xl: clamp(2rem, 4vw, 3rem);
+
+  /* Typography scale */
+  --font-size-xs: clamp(0.75rem, 0.8vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 1vw, 1rem);
+  --font-size-md: clamp(1rem, 1.2vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 1.5vw, 1.375rem);
+  --font-size-xl: clamp(1.375rem, 2vw, 1.75rem);
+  --font-size-2xl: clamp(1.75rem, 3vw, 2.5rem);
+  --font-size-3xl: clamp(2.25rem, 4vw, 3.5rem);
+
+  /* Font families */
+  --font-family: "Athelas", Georgia, "Times New Roman", serif;
+  --font-family-heading: "Larken", Georgia, serif;
+  --font-family-mono: "SF Mono", Monaco, "Cascadia Code", monospace;
+
+  /* Line heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px var(--shadow-color);
+  --shadow: 0 4px 6px var(--shadow-color);
+  --shadow-lg: 0 10px 25px var(--shadow-color);
+  --shadow-xl: 0 25px 50px var(--shadow-color);
+
+  /* Transitions */
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  scroll-behavior: smooth;
+  text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+::selection {
+  color: var(--color-background);
+  background-color: var(--color-text);
+}
+
+.numbers {
+  font-family: "EB Garamond", Georgia, serif;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 var(--space-md) 0;
+  font-family: var(--font-family-heading);
+  font-weight: 400;
+  line-height: var(--line-height-tight);
+  color: var(--color-text);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--font-size-3xl);
+}
+h2 {
+  font-size: var(--font-size-2xl);
+}
+h3 {
+  font-size: var(--font-size-xl);
+}
+h4 {
+  font-size: var(--font-size-lg);
+}
+h5 {
+  font-size: var(--font-size-md);
+}
+h6 {
+  font-size: var(--font-size-sm);
+}
+
+p {
+  margin: 0 0 var(--space-md) 0;
+  line-height: var(--line-height-relaxed);
+  text-wrap: pretty;
+  max-width: 65ch;
+}
+
+/* Links */
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 0.125em;
+  text-underline-offset: 0.125em;
+  transition: var(--transition);
+}
+
+a:hover,
+a:focus {
+  color: var(--color-link-hover);
+  text-decoration-thickness: 0.1875em;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Code */
+code,
+pre {
+  font-family: var(--font-family-mono);
+  background-color: var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+}
+
+code {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+}
+
+pre {
+  padding: var(--space-md);
+  overflow-x: auto;
+  margin-bottom: var(--space-lg);
+}
+
+pre code {
+  padding: 0;
+  background: none;
+}
+
+/* Blockquotes */
+blockquote {
+  margin: var(--space-lg) 0;
+  padding: var(--space-md);
+  border-left: 4px solid var(--color-accent);
+  background-color: var(--color-surface);
+  border-radius: var(--radius);
+  font-style: italic;
+  font-size: var(--font-size-lg);
+}
+
+blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+blockquote cite {
+  display: block;
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-style: normal;
+}
+
+blockquote cite::before {
+  content: "— ";
+}
+
+/* HR */
+hr {
+  border: none;
+  height: 1px;
+  background-color: var(--color-border);
+  margin: var(--space-xl) 0;
+}
