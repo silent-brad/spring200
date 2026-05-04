@@ -1,6 +1,11 @@
 {
   "name": "Spring92 Challenge",
   "short_name": "Spring92",
+  "scope": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#fff3a5",
+  "background_color": "#ffffff",
   "icons": [
     {
       "src": "/static/images/web-app-manifest-192x192.png",
@@ -14,8 +19,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "theme_color": "#fff3a5",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }

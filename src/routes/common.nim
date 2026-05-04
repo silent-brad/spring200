@@ -1,6 +1,7 @@
 import asynchttpserver
 import options
 import os, strutils, macros
+import times, strformat
 import ../types, ../utils, ../database/models
 
 template guard_walker*(session: Option[Session]): untyped =
@@ -21,6 +22,7 @@ proc post_unauthorized*(msg: string): (string, HttpCode, HttpHeaders) =
   (html_error(msg), Http401, new_http_headers([("Content-Type", "text/html")]))
 
 proc serve_static_file*(req_path, url_prefix, dir: string,
+                        client_headers: HttpHeaders,
                         check_safe_ext: bool = false): (string, HttpCode, HttpHeaders) =
   let file_path = sanitize_path(req_path[url_prefix.len..^1])
   let full_path = dir / file_path
@@ -45,9 +47,36 @@ proc serve_static_file*(req_path, url_prefix, dir: string,
     of ".gif": "image/gif"
     of ".svg": "image/svg+xml"
     of ".ico": "image/x-icon"
+    of ".webmanifest": "application/manifest+json"
     else: "application/octet-stream"
 
-  return (read_file(full_path), Http200, new_http_headers([("Content-Type", content_type)]))
+  let file_info = get_file_info(full_path)
+  let last_modified = file_info.last_write_time
+  let last_modified_str = last_modified.utc.format("ddd, dd MMM yyyy HH:mm:ss 'GMT'")
+  let etag = &"\"w/{file_info.size}.{last_modified_str}\""
+
+  var resp_headers = new_http_headers([
+    ("Content-Type", content_type),
+    ("Last-Modified", last_modified_str),
+    ("ETag", etag)
+  ])
+
+  # Check If-None-Match for conditional request (304 Not Modified)
+  if client_headers.has_key("If-None-Match"):
+    if client_headers["If-None-Match"] == etag:
+      return ("", Http304, resp_headers)
+
+  let is_user_content = dir in @["pictures", "avatars"]
+
+  if "?v=" in req_path:
+    # Versioned static assets: cache forever
+    resp_headers.add("Cache-Control", "public, max-age=31536000, immutable")
+  elif is_user_content:
+    resp_headers.add("Cache-Control", "public, max-age=86400, must-revalidate")
+  else:
+    resp_headers.add("Cache-Control", "public, max-age=86400")
+
+  return (read_file(full_path), Http200, resp_headers)
 
 proc to_display_entries*(leaderboard: seq[tuple[walker: Walker, total_miles: float]]): seq[Entry] =
   for db_entry in leaderboard:

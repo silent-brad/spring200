@@ -224,7 +224,7 @@ proc handle_get_routes*(req: Request, session: Option[Session],
 
         status = Http302
         headers = new_http_headers([
-          ("Set-Cookie", "session_id=" & session_id & "; HttpOnly; Path=/"),
+          ("Set-Cookie", "session_id=" & session_id & cookie_attrs),
           ("Location", "/dashboard")
         ])
     except:
@@ -233,11 +233,11 @@ proc handle_get_routes*(req: Request, session: Option[Session],
           "/select-walker?error=invalid-walker")])
   else:
     if req.url.path.starts_with("/static/"):
-      return serve_static_file(req.url.path, "/static/", "static")
+      return serve_static_file(req.url.path, "/static/", "static", req.headers)
     elif req.url.path.starts_with("/pictures/"):
-      return serve_static_file(req.url.path, "/pictures/", "pictures", check_safe_ext = true)
+      return serve_static_file(req.url.path, "/pictures/", "pictures", req.headers, check_safe_ext = true)
     elif req.url.path.starts_with("/avatars/"):
-      return serve_static_file(req.url.path, "/avatars/", "avatars", check_safe_ext = true)
+      return serve_static_file(req.url.path, "/avatars/", "avatars", req.headers, check_safe_ext = true)
     else:
       status = Http404
       response_body = render_template("404.jinja", session)

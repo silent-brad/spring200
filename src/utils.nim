@@ -186,16 +186,18 @@ proc fmt_miles*(miles: float): string =
   return s
 
 proc error_div*(msg: string): string =
-  """<div class="error" style="background-color: var(--error-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">""" & msg & "</div>"
+  """<div class="error solid">""" & msg & "</div>"
 
 proc success_div*(msg: string): string =
-  """<div class="success" style="background-color: var(--success-oklch-500); color: var(--neutral-oklch-50); padding: 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">""" & msg & "</div>"
+  """<div class="success solid">""" & msg & "</div>"
 
 proc html_error*(msg: string): string =
-  """<p style="color: var(--error-oklch-500);">""" & msg & "</p>"
+  """<p class="text-muted">""" & msg & "</p>"
 
 proc html_success*(msg: string): string =
-  """<p style="color: var(--success-oklch-500);">""" & msg & "</p>"
+  """<p class="text-muted">""" & msg & "</p>"
+
+const cookie_attrs* = "; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax"
 
 proc format_date_with_ordinal*(dt: DateTime): string =
   ## Format date like "9:02pm, Dec 12th, 2025" with lowercase am/pm

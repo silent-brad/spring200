@@ -49,7 +49,7 @@ proc handle_post_routes*(req: Request, session: Option[Session],
               is_family_session: true
             )
         headers = new_http_headers([
-          ("Set-Cookie", "session_id=" & session_id & "; HttpOnly; Path=/"),
+          ("Set-Cookie", "session_id=" & session_id & cookie_attrs),
           ("HX-Redirect", "/select-walker?success=login")
         ])
         response_body = success_div("Login successful! Redirecting...")
@@ -85,7 +85,7 @@ proc handle_post_routes*(req: Request, session: Option[Session],
                 email: email, is_family_session: true)
 
         headers = new_http_headers([
-          ("Set-Cookie", "session_id=" & session_id & "; HttpOnly; Path=/"),
+          ("Set-Cookie", "session_id=" & session_id & cookie_attrs),
           ("HX-Redirect", "/add-walker?success=signup")
         ])
         response_body = success_div("Account created successfully!")
@@ -123,7 +123,7 @@ proc handle_post_routes*(req: Request, session: Option[Session],
             sessions[session_id] = new_session
 
         headers = new_http_headers([
-          ("Set-Cookie", "session_id=" & session_id & "; HttpOnly; Path=/"),
+          ("Set-Cookie", "session_id=" & session_id & cookie_attrs),
           ("HX-Redirect", "/dashboard?success=walker-created")
         ])
         response_body = success_div("Walker account created successfully!")

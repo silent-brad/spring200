@@ -30,3 +30,11 @@
 
 * DONE Deploy to Homelab (also migrate)
   CLOSED: [2026-03-21 Sat 10:24]
+* DONE Make images on the leaderboard and posts page load faster
+* DONE Make password on mobile store cookies longer
+* TODO Make posts sizing fit on mobile and bigger on desktop
+* TODO Make dashboard load all walker data and load the alast 10 mile entries and have a show more button
+* TODO Make posts have edit button which changes to save, delete and cancel buttons (with delete button popup)
+* TODO Make delete walker button sized right
+* TODO Add avatar/name to dashboard page
+* TODO Maybe make it not reload page on form submit
