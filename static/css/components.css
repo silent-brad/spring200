@@ -550,10 +550,6 @@ li {
 
 /* Mobile: full-bleed edge-to-edge cards */
 @media (max-width: 768px) {
-  .post-feed-container {
-    margin: 0 calc(-1 * var(--space-sm));
-  }
-
   .post-card {
     margin-bottom: var(--space-sm);
     padding: var(--space-md);
