@@ -83,6 +83,7 @@
 		<div id="daily-miles-list" class="numbers">
 			<p>Loading daily miles...</p>
 		</div>
+		<div id="entries-load-more"></div>
 		<div id="edit-response"></div>
 	</div>
 </article>
@@ -112,10 +113,10 @@ const ctx = document.getElementById('milesChart').getContext('2d');
 const milesChart = new Chart(ctx, {
 	type: 'line',
 	data: {
-		labels: [], // Will be populated with dates
+		labels: [],
 		datasets: [{
 			label: 'Daily Miles',
-			data: [], // Will be populated with miles data
+			data: [],
 			borderColor: '#F8F59B',
 			backgroundColor: 'rgba(59, 130, 246, 0.1)',
 			tension: 0.1,
@@ -142,72 +143,94 @@ const milesChart = new Chart(ctx, {
 	},
 });
 
-// Load chart data and daily miles list
-function loadDashboardData() {
+let currentEntryPage = 1;
+let hasMoreEntries = false;
+
+function loadChartData() {
 	fetch('/api/user-miles-data')
 		.then(response => response.json())
 		.then(data => {
-			// Fill missing days from Mar 20th to today with 0 miles
-			const startDate = new Date('2026-03-20');
-			const today = new Date();
-			const allDates = [];
-			const allMiles = [];
-			
-			// Create a map of existing data for quick lookup
-			const dataMap = new Map();
 			if (data.dates && data.miles) {
-				for (let i = 0; i < data.dates.length; i++) {
-					dataMap.set(data.dates[i], data.miles[i]);
-				}
-			}
-			
-			// Fill all days from Mar 20th to today
-			for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
-				const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-				allDates.push(dateStr);
-				allMiles.push(dataMap.get(dateStr) || 0);
-			}
-			
-			// Update chart - dates are already in chronological order (past to present)
-      milesChart.data.labels = allDates;
-      milesChart.data.datasets[0].data = allMiles;
-			milesChart.update();
-			
-			// Update daily miles list
-			const listContainer = document.getElementById('daily-miles-list');
-			if (data.entries && data.entries.length > 0) {
-				let html = '<table><thead><tr><th>Date</th><th>Miles</th><th></th></tr></thead><tbody>';
-				data.entries.forEach(entry => {
-					html += `<tr id="entry-row-${entry.id}">
-						<td>${entry.date}</td>
-						<td class="miles-display-${entry.id}">${entry.miles}</td>
-						<td class="entry-actions">
-							<button class="secondary outline edit-btn" onclick="editMiles(${entry.id}, ${entry.miles})">Edit</button>
-						</td>
-					</tr>`;
-				});
-				html += '</tbody></table>';
-				listContainer.innerHTML = html;
-			} else {
-				listContainer.innerHTML = '<p>No miles logged yet. Log your first miles above!</p>';
+				milesChart.data.labels = data.dates;
+				milesChart.data.datasets[0].data = data.miles;
+				milesChart.update();
 			}
 		})
 		.catch(error => {
-			console.error('Error loading dashboard data:', error);
+			console.error('Error loading chart data:', error);
+		});
+}
+
+function loadEntries(page, append) {
+	fetch('/api/user-miles-entries?page=' + page)
+		.then(response => response.json())
+		.then(data => {
+			const listContainer = document.getElementById('daily-miles-list');
+			const loadMoreContainer = document.getElementById('entries-load-more');
+
+			if (!append) {
+				if (data.total === 0) {
+					listContainer.innerHTML = '<p>No miles logged yet. Log your first miles above!</p>';
+					loadMoreContainer.innerHTML = '';
+					return;
+				}
+				listContainer.innerHTML = '<table><thead><tr><th>Date</th><th>Miles</th><th></th></tr></thead><tbody id="entries-tbody"></tbody></table>';
+			}
+
+			const tbody = document.getElementById('entries-tbody');
+			if (data.entries && data.entries.length > 0) {
+				data.entries.forEach(entry => {
+					const tr = document.createElement('tr');
+					tr.id = 'entry-row-' + entry.id;
+					tr.innerHTML = `<td>${entry.date}</td>
+						<td class="miles-display-${entry.id}">${entry.miles}</td>
+						<td class="entry-actions">
+							<button class="secondary outline edit-btn" onclick="editMiles(${entry.id}, ${entry.miles})">Edit</button>
+							</td>`;
+					tbody.appendChild(tr);
+				});
+			}
+
+			currentEntryPage = page;
+			hasMoreEntries = data.has_more;
+
+			if (data.has_more) {
+				loadMoreContainer.innerHTML = `<button class="secondary outline load-more-btn" onclick="loadMoreEntries()">Show More</button>`;
+			} else {
+				loadMoreContainer.innerHTML = '';
+			}
+		})
+		.catch(error => {
+			console.error('Error loading entries:', error);
 			document.getElementById('daily-miles-list').innerHTML = '<p>Error loading data.</p>';
 		});
 }
 
+function loadMoreEntries() {
+	if (hasMoreEntries) {
+		loadEntries(currentEntryPage + 1, true);
+	}
+}
+
 function editMiles(entryId, currentMiles) {
 	const row = document.getElementById('entry-row-' + entryId);
+	if (!row) return;
 	const cells = row.querySelectorAll('td');
 	cells[1].innerHTML = `<input type="number" id="edit-miles-${entryId}" value="${currentMiles}" step="0.1" min="0.1" max="50" class="numbers edit-miles-input">`;
 	cells[2].innerHTML = `
 		<div class="edit-form">
 			<button class="secondary outline save-btn" onclick="submitEditMiles(${entryId})">Save</button>
 			<button class="secondary outline delete-btn-inline" onclick="deleteMiles(${entryId})">Delete</button>
-			<button class="secondary outline cancel-btn-inline" onclick="loadDashboardData()">Cancel</button>
+			<button class="secondary outline cancel-btn-inline" onclick="cancelEdit(${entryId}, ${currentMiles})">Cancel</button>
 		</div>`;
+}
+
+function cancelEdit(entryId, currentMiles) {
+	const row = document.getElementById('entry-row-' + entryId);
+	if (!row) return;
+	const cells = row.querySelectorAll('td');
+	cells[1].innerHTML = `<span class="miles-display-${entryId}">${currentMiles}</span>`;
+	cells[2].innerHTML = `<button class="secondary outline edit-btn" onclick="editMiles(${entryId}, ${currentMiles})">Edit</button>`;
 }
 
 function submitEditMiles(entryId) {
@@ -218,7 +241,8 @@ function submitEditMiles(entryId) {
 		body: 'entry_id=' + entryId + '&miles=' + miles
 	}).then(r => r.text()).then(html => {
 		document.getElementById('edit-response').innerHTML = html;
-		loadDashboardData();
+		loadChartData();
+		loadEntries(1, false);
 		setTimeout(() => { window.location.reload(); }, 1000);
 	});
 }
@@ -231,22 +255,25 @@ function deleteMiles(entryId) {
 		body: 'entry_id=' + entryId
 	}).then(r => r.text()).then(html => {
 		document.getElementById('edit-response').innerHTML = html;
-		loadDashboardData();
+		loadChartData();
+		loadEntries(1, false);
 		setTimeout(() => { window.location.reload(); }, 1000);
 	});
 }
 
 // Load data when page loads
-document.addEventListener('DOMContentLoaded', loadDashboardData);
+document.addEventListener('DOMContentLoaded', function() {
+	loadChartData();
+	loadEntries(1, false);
+});
 
 // Reload data after successful mile logging
 document.addEventListener('htmx:afterSwap', function(event) {
 	if (event.detail.target.id === 'log-response') {
-		// Check if the response contains success message
 		if (event.detail.target.innerHTML.includes('successfully')) {
 			setTimeout(() => {
-				loadDashboardData();
-				// Reload the page to update progress bar
+				loadChartData();
+				loadEntries(1, false);
 				window.location.reload();
 			}, 1000);
 		}

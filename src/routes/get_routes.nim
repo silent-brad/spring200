@@ -177,7 +177,32 @@ proc handle_get_routes*(req: Request, session: Option[Session],
     miles_json.add("]")
     entries_json.add("]")
 
-    response_body = &"""{{"dates": {dates_json}, "miles": {miles_json}, "entries": {entries_json}}}"""
+    response_body = &"""{{"dates": {dates_json}, "miles": {miles_json}}}"""
+
+  of "/api/user-miles-entries":
+    guard_json_unauthorized(session)
+    const page_size = 10
+    var page = 1
+    if req.url.query.len > 0 and req.url.query.starts_with("page="):
+      try: page = parse_int(req.url.query[5..^1])
+      except: discard
+    let offset = (page - 1) * page_size
+    let walker_id = session.get().walker_id
+    let total_entries = get_user_entry_count(db_conn, walker_id)
+    let recent_entries = get_user_recent_entries(db_conn, walker_id, page_size + 1, offset)
+    let has_more = recent_entries.len > page_size
+    let display_entries = if has_more: recent_entries[0 ..< page_size] else: recent_entries
+
+    var entries_json = "["
+    for i, entry in display_entries:
+      if i > 0:
+        entries_json.add(",")
+      let formatted_date = format_date_with_ordinal(entry.logged_at)
+      entries_json.add(&"""{{"id": {entry.id}, "date": "{formatted_date}", "miles": {fmtMiles(entry.miles)}}}""")
+    entries_json.add("]")
+
+    headers = new_http_headers([("Content-Type", "application/json")])
+    response_body = &"""{{"entries": {entries_json}, "has_more": {has_more}, "next_page": {page + 1}, "total": {total_entries}}}"""
 
   of "/api/post-feed":
     guard_walker(session)
